@@ -1,6 +1,7 @@
 from loader import bot, dp, db 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from .users.commands.start import user_register_hanlder, user_start_hanlder
 
 
 @dp.callback_query_handler()
@@ -18,13 +19,13 @@ async def callback_filter(update : types.Message, state : FSMContext):
 @dp.message_handler(commands='start')
 async def start_filter(update : types.Message, state : FSMContext):
     if await db.is_user(update.from_user.id):
-        pass
+        await user_start_hanlder(update)
 
     elif await db.is_admin(update.from_user.id):
         pass
 
     else:
-        pass
+        await user_register_hanlder(update)
 
 
 

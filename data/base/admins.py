@@ -2,7 +2,9 @@ from asyncpg.pool import PoolAcquireContext, Pool
 from datetime import datetime
 from aiocache import SimpleMemoryCache
 from datetime import datetime
+from pytz import timezone
 
+tz_tashkent = timezone('Asia/Tashkent')
 
 
 class Admin:
@@ -19,7 +21,7 @@ class Admin:
         if registered:
             self.registered = registered
         else:
-            self.registered = datetime.now()
+            self.registered = datetime.now(tz_tashkent)
 
     @property
     def registred_readble(self) -> str:

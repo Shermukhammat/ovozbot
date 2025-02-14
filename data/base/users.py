@@ -1,8 +1,11 @@
 from asyncpg.pool import PoolAcquireContext, Pool
 from datetime import datetime
 from aiocache import SimpleMemoryCache
-from datetime import datetime
+from datetime import datetime, timezone as d_timezone
+from pytz import timezone
+from aiogram.utils.markdown import escape_md
 
+tz_tashkent = timezone('Asia/Tashkent')
 
 class UserStatus:
     active = 1
@@ -25,7 +28,7 @@ class User:
         if registered:
             self.registered = registered
         else:
-            self.registered = datetime.now()
+            self.registered = datetime.now(tz_tashkent)
 
 
     @property
@@ -35,6 +38,10 @@ class User:
     @property
     def is_active(self) -> bool:
         return self.status == UserStatus.active
+    
+    @property
+    def safe_name(self) -> str:
+        return escape_md(self.name)
 
 class UsersDB:
     def __init__(self, ttl = 20) -> None: 
@@ -111,7 +118,7 @@ async def registr_user_to_db(pool : Pool, user : User):
 async def get_user_from_db(pool : Pool, id : int) -> User:
     async with pool.acquire() as conn:
         conn : Pool
-        row = await conn.fetchrow("""SELECT registered, status, name, lang FROM users WHERE id = $1""", id)
+        row = await conn.fetchrow("""SELECT registered AT TIME ZONE 'Asia/Tashkent', status, name, lang FROM users WHERE id = $1""", id)
         if row:
             await conn.execute(""" INSERT INTO activity (id) VALUES ($1) ON CONFLICT (id) DO NOTHING; """, id)
             return User(id = id, 

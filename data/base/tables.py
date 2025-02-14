@@ -8,10 +8,11 @@ from asyncpg.pool import PoolAcquireContext, Pool
 async def creat_tables(pool : Pool):
     async with pool.acquire() as conn:
         conn : Pool
+        # await conn.execute("DROP TABLE users;")
         await conn.execute("""CREATE TABLE IF NOT EXISTS users
                               (id BIGINT PRIMARY KEY, 
                                name TEXT, 
-                               registered TIMESTAMP, 
+                               registered TIMESTAMP WITH TIME ZONE NOT NULL, 
                                status INTEGER, 
                                lang TEXT
                            );""")

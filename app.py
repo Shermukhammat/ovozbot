@@ -2,6 +2,7 @@ from loader import dp
 from aiogram import executor
 from startups import on_shutdown, on_startup
 from utilites import logger
+import handlers
 
 
 if __name__ == '__main__':
