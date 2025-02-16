@@ -1,11 +1,11 @@
 from loader import bot, dp, db 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from .users.commands.start import user_register_hanlder, user_start_hanlder
-from .users.inline.main import user_inline_search
-import os
+from .users.commands.start import user_start_hanlder
+from .users.inline.main import user_inline_search, non_user_inline_search
 from uuid import uuid4
-
+from utilites import register_user
+import os
 
 os.makedirs('data/voices', exist_ok=True)
 
@@ -30,13 +30,13 @@ os.makedirs('data/voices', exist_ok=True)
 async def inline_filter(update : types.InlineQuery, state : FSMContext):
     user = await db.get_user(update.from_user.id)
     if user:
-        await user_inline_search(update, user)
+        await user_inline_search(update)
 
     elif await db.is_admin(update.from_user.id):
         pass
 
     else:
-        pass
+        await non_user_inline_search(update)
 
 
 # @dp.callback_query_handler()
@@ -60,7 +60,7 @@ async def start_filter(update : types.Message, state : FSMContext):
         pass
 
     else:
-        await user_register_hanlder(update)
+        await register_user(update.from_user.id, update.from_user.first_name)
 
 
 

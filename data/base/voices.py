@@ -71,11 +71,17 @@ class VoicesDb:
 
 
     async def get_top_voices(self, limit : int = 20) -> list[Voice]:
+        top = await self.voices_cache.get('top')
+        if top:
+            return top
+        
         query = "SELECT id, title, tag, url, message_id, views FROM voices ORDER BY views DESC LIMIT $1; "
         async with self.pool.acquire() as conn:
             conn : Pool
-            return [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(query, limit)]
+            top = [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(query, limit)]
             
+            await self.voices_cache.set('top', top)
+            return top
 
 
 async def add_voice_to_db(pool : Pool, voice : Voice) -> int:
