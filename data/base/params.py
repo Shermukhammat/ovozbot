@@ -70,6 +70,8 @@ class ParamsDB:
         self.LOGO_URL : str = self.params_data.get('logo_url')
         self.NO_FOUND_URL : str = self.params_data.get('no_found_url')
         self.DOMEN : str = self.params_data.get('domen')
+        self.API_ID : int =  self.params_data.get('api_id')
+        self.API_HASH : str = self.params_data.get('api_hash')
 
     def update_params(self):
         self.yaml.update_yaml(self.params_data)

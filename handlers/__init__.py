@@ -1,2 +1,2 @@
-from . import chanels
 from . import filter
+from . import chanels
