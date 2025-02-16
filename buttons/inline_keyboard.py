@@ -4,6 +4,10 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 class InlineKeyboards:
     def search_voice(query: str | None = "") -> InlineKeyboardMarkup:
+        if query:
+            return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("▶️ Ko'rish", switch_inline_query_current_chat=query)]]
+            )
         return InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton("🔍 Ovoz izlash", switch_inline_query_current_chat=query)]]
             )

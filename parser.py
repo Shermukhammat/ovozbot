@@ -10,6 +10,13 @@ async def main():
     await db.init()
 
     async with Client("sher", db.API_ID, db.API_HASH) as app:
+        await app.send_message('@ovozqaniibot', 'Kulgili ovozlar😆')
+        await asyncio.sleep(2)
+        async for message in app.get_chat_history('@ovozqaniibot', limit = 1):
+            message : types.Message
+            print(message.reply_markup)
+
+        return
         for n in range(last, 300):
             message = await app.send_message('@ovozqanibot', f"/{n}")
             await asyncio.sleep(15)

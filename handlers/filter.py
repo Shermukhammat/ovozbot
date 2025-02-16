@@ -3,6 +3,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from .users.commands.start import user_start_hanlder
 from .users.inline.main import user_inline_search, non_user_inline_search
+from .users.messages import user_text_handler
 from uuid import uuid4
 from utilites import register_user
 import os
@@ -66,11 +67,12 @@ async def start_filter(update : types.Message, state : FSMContext):
 
 @dp.message_handler()
 async def text_filter(update : types.Message, state : FSMContext):
-    if await db.is_user(update.from_user.id):
-        pass
+    user =  await db.is_user(update.from_user.id)
+    if user:
+        await user_text_handler(update, user)
 
     elif await db.is_admin(update.from_user.id):
         pass
 
     else:
-        pass
+        await register_user(update.from_user.id, update.from_user.first_name)

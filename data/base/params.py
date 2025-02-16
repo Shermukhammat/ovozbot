@@ -72,6 +72,16 @@ class ParamsDB:
         self.DOMEN : str = self.params_data.get('domen')
         self.API_ID : int =  self.params_data.get('api_id')
         self.API_HASH : str = self.params_data.get('api_hash')
+        self.QIZQARLI_OVOZLAR : list[list[dict[str, int]]] = self.params_data.get('qizqarli_ovozlar')
+        self.SHERLAR : list[list[dict[str, int]]] = self.params_data.get('sherlar')
+        self.TABRIKLAR : list[list[dict[str, int]]] = self.params_data.get('tabriklar')
+        self.ovozlar_data : dict[str, int] = {}
+        
+        for row in self.QIZQARLI_OVOZLAR + self.SHERLAR + self.TABRIKLAR:
+            for button in row:
+                for name, id in button.items():
+                    self.ovozlar_data[name] = id
+
 
     def update_params(self):
         self.yaml.update_yaml(self.params_data)
