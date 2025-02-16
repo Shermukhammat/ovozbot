@@ -12,7 +12,7 @@ class InlineKeyboards:
             [InlineKeyboardButton("🔍 Ovoz izlash", switch_inline_query_current_chat=query)]]
             )
     
-    def voice_buttons(id : int, query : str) -> InlineKeyboardButton:
+    def voice_buttons(id : int, query : str | None = "") -> InlineKeyboardButton:
         if query:
             search_text = "▶️ Davom ettirish"
         else:

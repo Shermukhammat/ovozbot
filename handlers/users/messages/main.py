@@ -19,10 +19,14 @@ async def user_text_handler(update : types.Message, user : User):
         await update.answer("She'rlar menyusi", reply_markup=Keyboards.sherlar)
 
     elif db.ovozlar_data.get(update.text):
-        message_id = db.ovozlar_data.get(update.text)
-        await bot.copy_message(chat_id=update.from_user.id, 
-                               message_id = message_id,
-                               from_chat_id = db.DATA_CHANEL_ID)
+        voice_id = db.ovozlar_data.get(update.text)
+        voice = await db.get_voice(voice_id)
+        if voice:
+            await bot.copy_message(chat_id=update.from_user.id,
+                                   message_id = voice.message_id,
+                                   caption = f"🎙 Nomi: {voice.title} \n🧩 Teg: {voice.tag}",
+                                   reply_markup = InlineKeyboards.voice_buttons(voice.id),
+                                   from_chat_id = db.DATA_CHANEL_ID)
     
     elif update.text == "⬅️ Orqaga":
         await update.answer("🎛 Bosh menyu", reply_markup = Keyboards.user_home_menu)
