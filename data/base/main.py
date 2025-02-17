@@ -13,12 +13,12 @@ from .voices import VoicesDb
 
 class DataBase(ParamsDB, UsersDB,AdminsDB, ActivityTracker, Statistic, VoicesDb):
     def __init__(self, config_file_path : str) -> None:
-        ParamsDB.__init__(self, config_file_path)
         UsersDB.__init__(self, ttl = 30)
         AdminsDB.__init__(self, ttl = 30)
         VoicesDb.__init__(self, ttl = 30)
         ActivityTracker.__init__(self)
         Statistic.__init__(self)
+        ParamsDB.__init__(self, config_file_path)
         self.pool : Pool = None
         self.bot : AiogramUser = None
 

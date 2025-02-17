@@ -1,28 +1,15 @@
 from loader import bot, dp, db 
+from data import Admin
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from .users.commands.start import user_start_hanlder
 from .users.inline import user_inline_search, non_user_inline_search, user_inline_playlist, user_inline_top
 from .users.messages import user_text_handler
-from .users.commands import user_menu_command_hanlder
+from .users.commands import user_menu_command_hanlder, user_admin_command_hanlder, user_start_hanlder
 from .users.callback import user_callback_handler
 from uuid import uuid4
 from utilites import register_user
 import os
 
-os.makedirs('data/voices', exist_ok=True)
-
-# @dp.message_handler(content_types=types.ContentType.VOICE)
-# async def vss(update : types.Message):
-#     file = await bot.get_file(update.voice.file_id)
-#     mimtype = file.file_path.split('.')[-1]
-#     local_file_name = f"{uuid4().hex}.{mimtype}"
-
-#     await file.download(destination_file = f'data/voices/{local_file_name}')
-#     data = await bot.send_voice(chat_id=db.DATA_CHANEL_ID,
-#                                 caption="test",
-#                                 voice = open(f'data/voices/{local_file_name}', 'rb'))
-#     print(data.voice.file_id)
 
     
 
@@ -96,6 +83,14 @@ async def command_menu_filter(update: types.Message):
 
     else:
         await register_user(update.from_user.id, update.from_user.first_name)
+
+
+@dp.message_handler(commands='admin')
+async def command_admin_filter(update: types.Message):
+    if await db.is_admin(update.from_user.id):
+        await user_admin_command_hanlder(update)
+    else:
+        await user_admin_command_hanlder(update)
 
 
 @dp.message_handler()

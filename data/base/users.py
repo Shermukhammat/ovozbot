@@ -33,8 +33,8 @@ class User:
 
     @property
     def registred_readble(self) -> str: 
-        return f"{self.registered.year}.{self.registered.month}.{self.registered.day} {self.registered.hour}:{self.registered.second}"
-
+        return self.registered.strftime('%Y-%m-%d %H:%M')
+    
     @property
     def is_active(self) -> bool:
         return self.status == UserStatus.active

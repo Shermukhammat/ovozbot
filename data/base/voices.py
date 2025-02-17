@@ -36,6 +36,7 @@ class VoicesDb:
         self.voices_cache = SimpleMemoryCache(ttl = ttl)
         self.playlist_cache = SimpleMemoryCache(ttl = ttl)
         self.pool : Pool = None
+        self.PINED_VOICES : list[int] = []
         
     
     async def add_voice(self, voice : Voice) -> int:
@@ -73,19 +74,6 @@ class VoicesDb:
             return [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(sql_query, query, query, limit)]
 
 
-    # async def get_top_voices(self, limit : int = 20) -> list[Voice]:
-    #     top : list = await self.voices_cache.get('top')
-    #     if top:
-    #         return top
-        
-    #     query = "SELECT id, title, tag, url, message_id, views FROM voices ORDER BY views DESC LIMIT $1; "
-    #     async with self.pool.acquire() as conn:
-    #         conn : Pool
-    #         top.append(Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(query, limit))
-            
-    #         await self.voices_cache.set('top', top)
-    #         return top
-
     async def get_playlist(self, user_id) -> list[int]:
         playlist = await self.playlist_cache.get(user_id)
         if playlist:
@@ -93,7 +81,7 @@ class VoicesDb:
         
         async with self.pool.acquire() as conn:
             conn : Pool
-            playlist = [row['voice_id'] for row in await conn.fetch(" SELECT voice_id FROM playlist WHERE user_id = $1; ", user_id)]
+            playlist = [row['voice_id'] for row in await conn.fetch(" SELECT voice_id FROM playlist WHERE user_id = $1 ORDER BY ctid DESC; ", user_id)]
             await self.playlist_cache.set(user_id, playlist)
 
             return playlist
@@ -101,7 +89,7 @@ class VoicesDb:
     async def add_voice_to_playlist(self, user_id : int, voice_id : int):
         playlist : list[int] = await self.playlist_cache.get(user_id)
         if playlist:
-            playlist.append(voice_id)
+            playlist.insert(0, voice_id)
             await self.playlist_cache.set(user_id, playlist)
 
         async with self.pool.acquire() as conn:
@@ -142,6 +130,37 @@ class VoicesDb:
             await self.voices_cache.set('top', voices, ttl = 200)
             return voices
 
+    async def get_pined_voices(self, offset : int | None = 0, limit : int | None = 50) -> list[Voice]:
+        pined : list = await self.voices_cache.get(f'pined{offset}', [])
+        if pined:
+            return pined
+        
+        if len(self.PINED_VOICES) > offset:
+            for index, id in enumerate(self.PINED_VOICES[offset:]):
+                if index < limit:
+                    voice = await self.get_voice(id)
+                    if voice:
+                        pined.append(voice)
+                else:
+                    break
+
+            await self.voices_cache.set(f'pined{offset}', pined, ttl = 200)
+            return pined
+        
+        return []
+
+    async def get_lates_voices(self, limit : int | None = 45, offset : int | None = 0) -> list[Voice]: 
+        lates : list = await self.voices_cache.get(f'lates{offset}')
+        if lates:
+            return lates
+        
+        query = "SELECT id, title, tag, url, message_id, views FROM voices ORDER BY id DESC OFFSET $1 LIMIT $2; "
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            lates = [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(query, offset, limit)]
+            
+            await self.voices_cache.set(f'lates{offset}', lates)
+            return lates
 
 async def add_voice_to_db(pool : Pool, voice : Voice) -> int:
     async with pool.acquire() as conn:

@@ -10,6 +10,9 @@ from utilites import register_user
 
 async def user_inline_search(update: types.InlineQuery):
     is_sender = update.chat_type == 'sender'
+    offset = int(update.offset) if update.offset.isdigit() else 0 
+    # print('offset:', offset)
+
     if len(update.query) > 3:
         voices = await db.search_voices(update.query)
         if voices:
@@ -17,12 +20,26 @@ async def user_inline_search(update: types.InlineQuery):
         else:
             await update.answer([nofound("Hechnarsa topilmadi")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
-    # else:
-    #     voices = await db.get_top_voices()
-    #     if voices:
-    #         await update.answer([inline_voice(voice, is_sender, update.query) for voice in voices], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
-    #     else:
-    #         await update.answer([nofound("Hozirda botda birortaxam ovoz yo'q")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
+    elif db.PINED_VOICES:
+        voice_limit = 50
+        voices = await db.get_pined_voices(voice_limit, offset)
+        next_offset = str(offset+voice_limit) if offset < 150 and len(voices) == voice_limit else ""
+
+        if voices:
+            await update.answer([inline_voice(voice, is_sender, update.query) for voice in voices], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
+        else:
+            await update.answer([nofound("Hozirda botda birortaxam ovoz yo'q")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
+
+    else:
+        voice_limit = 50
+        voices = await db.get_lates_voices(voice_limit, offset)
+        next_offset = str(offset+voice_limit) if offset < 150 and len(voices) == voice_limit else ""
+
+        if voices:
+            # print([v.id for v in voices])
+            await update.answer([inline_voice(voice, is_sender, update.query) for voice in voices], cache_time = db.INLINE_CACHE_TIME, is_personal = True, next_offset=next_offset)
+        elif offset == 0:
+            await update.answer([nofound("Hozirda botda birortaxam ovoz yo'q")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
 
 async def non_user_inline_search(update: types.InlineQuery):

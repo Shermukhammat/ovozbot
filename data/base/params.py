@@ -64,7 +64,7 @@ class ParamsDB:
         self.config = DatabseConfig(self.params_data.get('database', {}))
         self.TOKEN = self.params_data.get('token')
         self.DATA_CHANEL_ID : int = self.params_data.get('data_chanel_id')
-        self.DEV_ID : int = self.params_data.get('dev_id')
+        self.DEV_ID : list[int] = self.params_data.get('dev_id')
         self.HELP_CONTENT = self.params_data.get('help_video')
         self.INLINE_CACHE_TIME : int = self.params_data.get('inline_cache_time', 60**2)
         self.LOGO_URL : str = self.params_data.get('logo_url')
@@ -76,7 +76,8 @@ class ParamsDB:
         self.SHERLAR : list[list[dict[str, int]]] = self.params_data.get('sherlar')
         self.TABRIKLAR : list[list[dict[str, int]]] = self.params_data.get('tabriklar')
         self.ovozlar_data : dict[str, int] = {}
-        
+        self.PINED_VOICES : list[int] = self.params_data.get('pined_voices', [])
+
         for row in self.QIZQARLI_OVOZLAR + self.SHERLAR + self.TABRIKLAR:
             for button in row:
                 for name, id in button.items():

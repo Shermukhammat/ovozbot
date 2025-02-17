@@ -3,6 +3,8 @@ from datetime import datetime
 from aiocache import SimpleMemoryCache
 from datetime import datetime
 from pytz import timezone
+from aiogram.utils.markdown import escape_md
+
 
 tz_tashkent = timezone('Asia/Tashkent')
 
@@ -25,11 +27,14 @@ class Admin:
 
     @property
     def registred_readble(self) -> str:
-        return f"{self.registered.year}.{self.registered.month}.{self.registered.day} {self.registered.hour}:{self.registered.second}"
+        return self.registered.strftime('%Y-%m-%d %H:%M')
 
     def __str__(self) -> str:
         return f"Admin(id = {self.id}, name = '{self.name}', registered = '{self.registred_readble}')"
 
+    @property
+    def safe_name(self) -> str:
+        return escape_md(self.name)
 
 class AdminsDB:
     def __init__(self, ttl : int = 20) -> None:
@@ -99,10 +104,10 @@ async def registr_admin_to_db(pool : Pool, admin : Admin):
 async def get_admin_from_db(pool : Pool, id : int) -> Admin:
     async with pool.acquire() as conn:
         conn : Pool
-        row = await conn.fetchrow("""SELECT registered, name, lang FROM admins WHERE id = $1;""", id)
+        row = await conn.fetchrow("""SELECT registered AT TIME ZONE 'Asia/Tashkent', name, lang FROM admins WHERE id = $1;""", id)
         if row:
             return Admin(id = id, 
-                    registered=row['registered'],
+                    registered=row[0],
                     name=row['name'],
                     lang=row['lang'])
         
@@ -111,7 +116,7 @@ async def get_admins_from_db(pool : Pool) -> list[Admin]:
     resolt = []
     async with pool.acquire() as conn:
         conn : Pool
-        for row in await conn.fetch("""SELECT id, registered, name, lang FROM admins;"""):
+        for row in await conn.fetch("""SELECT id, registered AT TIME ZONE 'Asia/Tashkent', name, lang FROM admins;"""):
             resolt.append(Admin(id = row['id'], 
                     registered=row['registered'],
                     name=row['name'],
