@@ -4,6 +4,7 @@ from aiogram.dispatcher import FSMContext
 from .users.commands.start import user_start_hanlder
 from .users.inline.main import user_inline_search, non_user_inline_search
 from .users.messages import user_text_handler
+from .users.commands import user_menu_command_hanlder
 from uuid import uuid4
 from utilites import register_user
 import os
@@ -63,6 +64,16 @@ async def start_filter(update : types.Message, state : FSMContext):
     else:
         await register_user(update.from_user.id, update.from_user.first_name)
 
+@dp.message_handler(commands='menyu')
+async def command_menu_filter(update: types.Message):
+    if await db.is_user(update.from_user.id):
+        await user_menu_command_hanlder(update)
+
+    elif await db.is_admin(update.from_user.id):
+        pass
+
+    else:
+        await register_user(update.from_user.id, update.from_user.first_name)
 
 
 @dp.message_handler()

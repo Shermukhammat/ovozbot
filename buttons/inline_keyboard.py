@@ -3,6 +3,15 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 class InlineKeyboards:
+    show_top = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("🏆 Top ovozlar", switch_inline_query_current_chat="#top")]]
+            ) 
+    playlist = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("⭐️ Playlist", switch_inline_query_current_chat="#pl")]]
+            )
+    edit_help_content = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("🔄 O'zgartirish", callback_data = "edit_help_content")]]
+            )
     def search_voice(query: str | None = "") -> InlineKeyboardMarkup:
         if query:
             return InlineKeyboardMarkup(inline_keyboard=[

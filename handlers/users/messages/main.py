@@ -18,6 +18,15 @@ async def user_text_handler(update : types.Message, user : User):
     elif update.text == "She'rlar 📚":
         await update.answer("She'rlar menyusi", reply_markup=Keyboards.sherlar)
 
+    elif update.text == "🏆 Top ovozlar":
+        await update.answer("👇 Top ovozlarni ko'rish uchun pastdagi tugmani bosing", reply_markup = InlineKeyboards.show_top)
+    
+    elif update.text == "🔍 Ovoz izlash":
+        await update.answer("👇 Ovoz izlash uchun pastdagi tugmani bosing", reply_markup = InlineKeyboards.search_voice())
+
+    elif update.text == "⬅️ Orqaga":
+        await update.answer("🎛 Bosh menyu", reply_markup = Keyboards.user_home_menu)
+
     elif db.ovozlar_data.get(update.text):
         voice_id = db.ovozlar_data.get(update.text)
         voice = await db.get_voice(voice_id)
@@ -28,8 +37,6 @@ async def user_text_handler(update : types.Message, user : User):
                                    reply_markup = InlineKeyboards.voice_buttons(voice.id),
                                    from_chat_id = db.DATA_CHANEL_ID)
     
-    elif update.text == "⬅️ Orqaga":
-        await update.answer("🎛 Bosh menyu", reply_markup = Keyboards.user_home_menu)
 
     elif len(update.text) > 2:
         await update.reply("🔍 Natijalarni ko'rish uchun pastdagi tugamani bosing",
