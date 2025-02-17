@@ -2,7 +2,7 @@ from loader import bot, dp, db
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from .users.commands.start import user_start_hanlder
-from .users.inline import user_inline_search, non_user_inline_search, user_inline_playlist
+from .users.inline import user_inline_search, non_user_inline_search, user_inline_playlist, user_inline_top
 from .users.messages import user_text_handler
 from .users.commands import user_menu_command_hanlder
 from .users.callback import user_callback_handler
@@ -25,7 +25,18 @@ os.makedirs('data/voices', exist_ok=True)
 #     print(data.voice.file_id)
 
     
-    
+
+@dp.inline_handler(lambda update : update.query.startswith('#top'))
+async def inline_top_filter(update : types.InlineQuery, state : FSMContext):
+    if await db.is_user(update.from_user.id):
+        await user_inline_top(update)
+
+    elif await db.is_admin(update.from_user.id):
+        pass
+
+    else:
+        await non_user_inline_search(update)    
+
 
 @dp.inline_handler(lambda update : update.query.startswith('#pl'))
 async def inline_playlist_filter(update : types.InlineQuery, state : FSMContext):

@@ -24,6 +24,14 @@ async def user_text_handler(update : types.Message, user : User):
     elif update.text == "🔍 Ovoz izlash":
         await update.answer("👇 Ovoz izlash uchun pastdagi tugmani bosing", reply_markup = InlineKeyboards.search_voice())
 
+    elif update.text == "⭐️ Playlist":
+        await update.reply("👇 Playlistingizni ko'rish uchun pastdagi tugmani bosing", reply_markup = InlineKeyboards.playlist)
+    
+    elif update.text == "📖 Yordam":
+        await bot.copy_message(chat_id=update.from_user.id,
+                               from_chat_id=db.DATA_CHANEL_ID,
+                               message_id=db.HELP_CONTENT)
+
     elif update.text == "⬅️ Orqaga":
         await update.answer("🎛 Bosh menyu", reply_markup = Keyboards.user_home_menu)
 

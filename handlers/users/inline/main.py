@@ -17,12 +17,12 @@ async def user_inline_search(update: types.InlineQuery):
         else:
             await update.answer([nofound("Hechnarsa topilmadi")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
-    else:
-        voices = await db.get_top_voices()
-        if voices:
-            await update.answer([inline_voice(voice, is_sender, update.query) for voice in voices], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
-        else:
-            await update.answer([nofound("Hozirda botda birortaxam ovoz yo'q")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
+    # else:
+    #     voices = await db.get_top_voices()
+    #     if voices:
+    #         await update.answer([inline_voice(voice, is_sender, update.query) for voice in voices], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
+    #     else:
+    #         await update.answer([nofound("Hozirda botda birortaxam ovoz yo'q")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
 
 async def non_user_inline_search(update: types.InlineQuery):

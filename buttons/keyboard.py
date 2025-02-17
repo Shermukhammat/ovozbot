@@ -8,7 +8,8 @@ class Keyboards:
         [KeyboardButton("🔍 Ovoz izlash")],
         [KeyboardButton("Kulgili ovozlar 😆"), KeyboardButton("Tabriklar 🎉")],
         [KeyboardButton("She'rlar 📚"), KeyboardButton("🏆 Top ovozlar")],
-        [KeyboardButton("🎤 Ovoz qo'shish ➕")]
+        [KeyboardButton("🎤 Ovoz qo'shish ➕"), KeyboardButton("⭐️ Playlist")],
+        [KeyboardButton("📖 Yordam")]
     ], resize_keyboard=True)
 
     buttons = [[KeyboardButton(list(button.keys())[0]) for button in row] for row in db.QIZQARLI_OVOZLAR]

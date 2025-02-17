@@ -33,8 +33,6 @@ async def creat_tables(pool : Pool):
         await conn.execute("""CREATE TABLE IF NOT EXISTS playlist
                            (user_id BIGINT,
                             voice_id BIGINT); """)
-        
-
         await conn.execute("""CREATE TABLE IF NOT EXISTS activity (id BIGINT UNIQUE); """)
 
         await conn.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")

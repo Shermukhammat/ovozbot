@@ -10,6 +10,7 @@ class Voice:
                  tag : str = None,
                  url : str = None,
                  views : int = 0,
+                 in_playlist : int = 0,
                  message_id : int = None ) -> None:
         self.id = id
         self.title = title
@@ -17,6 +18,7 @@ class Voice:
         self.url = url
         self.views = views
         self.message_id = message_id
+        self.in_playlist = in_playlist
 
     @property
     def str_id(self) -> str:
@@ -71,18 +73,18 @@ class VoicesDb:
             return [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(sql_query, query, query, limit)]
 
 
-    async def get_top_voices(self, limit : int = 20) -> list[Voice]:
-        top = await self.voices_cache.get('top')
-        if top:
-            return top
+    # async def get_top_voices(self, limit : int = 20) -> list[Voice]:
+    #     top : list = await self.voices_cache.get('top')
+    #     if top:
+    #         return top
         
-        query = "SELECT id, title, tag, url, message_id, views FROM voices ORDER BY views DESC LIMIT $1; "
-        async with self.pool.acquire() as conn:
-            conn : Pool
-            top = [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(query, limit)]
+    #     query = "SELECT id, title, tag, url, message_id, views FROM voices ORDER BY views DESC LIMIT $1; "
+    #     async with self.pool.acquire() as conn:
+    #         conn : Pool
+    #         top.append(Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(query, limit))
             
-            await self.voices_cache.set('top', top)
-            return top
+    #         await self.voices_cache.set('top', top)
+    #         return top
 
     async def get_playlist(self, user_id) -> list[int]:
         playlist = await self.playlist_cache.get(user_id)
@@ -115,6 +117,31 @@ class VoicesDb:
         async with self.pool.acquire() as conn:
             conn : Pool
             await conn.execute("DELETE FROM playlist WHERE user_id = $1 AND voice_id = $2", user_id, voice_id)
+    
+    async def get_top_voices(self) -> list[Voice]:
+        voices : list = await self.voices_cache.get('top', [])
+        if voices:
+            return voices
+        
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            for row in await conn.fetch(""" SELECT v.id, v.title, v.tag, v.url, v.views, v.message_id, COUNT(p.voice_id) AS usage_count
+        FROM voices v
+        JOIN playlist p ON v.id = p.voice_id
+        GROUP BY v.id
+        ORDER BY usage_count DESC
+        LIMIT 47; """):
+                voices.append(Voice(id = row['id'],
+                                    tag = row['tag'],
+                                    url = row['url'],
+                                    views = row['views'],
+                                    in_playlist = row['usage_count'],
+                                    message_id = row['message_id'],
+                                    title=row['title']))
+
+            await self.voices_cache.set('top', voices, ttl = 200)
+            return voices
+
 
 async def add_voice_to_db(pool : Pool, voice : Voice) -> int:
     async with pool.acquire() as conn:
