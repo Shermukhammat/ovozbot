@@ -30,6 +30,9 @@ async def creat_tables(pool : Pool):
                            url TEXT,
                            views BIGINT,
                            message_id BIGINT); """)
+        await conn.execute("""CREATE TABLE IF NOT EXISTS playlist
+                           (user_id BIGINT,
+                            voice_id BIGINT); """)
         
 
         await conn.execute("""CREATE TABLE IF NOT EXISTS activity (id BIGINT UNIQUE); """)

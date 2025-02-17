@@ -32,6 +32,7 @@ class Voice:
 class VoicesDb:
     def __init__(self, ttl : int = 30):
         self.voices_cache = SimpleMemoryCache(ttl = ttl)
+        self.playlist_cache = SimpleMemoryCache(ttl = ttl)
         self.pool : Pool = None
         
     
@@ -83,6 +84,37 @@ class VoicesDb:
             await self.voices_cache.set('top', top)
             return top
 
+    async def get_playlist(self, user_id) -> list[int]:
+        playlist = await self.playlist_cache.get(user_id)
+        if playlist:
+            return playlist
+        
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            playlist = [row['voice_id'] for row in await conn.fetch(" SELECT voice_id FROM playlist WHERE user_id = $1; ", user_id)]
+            await self.playlist_cache.set(user_id, playlist)
+
+            return playlist
+
+    async def add_voice_to_playlist(self, user_id : int, voice_id : int):
+        playlist : list[int] = await self.playlist_cache.get(user_id)
+        if playlist:
+            playlist.append(voice_id)
+            await self.playlist_cache.set(user_id, playlist)
+
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            await conn.execute("INSERT INTO playlist (user_id, voice_id) VALUES($1, $2)", user_id, voice_id)
+
+    async def remove_voice_from_playlist(self, user_id : int, voice_id : int):
+        playlist : list[int] = await self.playlist_cache.get(user_id)
+        if playlist:
+            playlist.remove(voice_id)
+            await self.playlist_cache.set(user_id, playlist)
+
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            await conn.execute("DELETE FROM playlist WHERE user_id = $1 AND voice_id = $2", user_id, voice_id)
 
 async def add_voice_to_db(pool : Pool, voice : Voice) -> int:
     async with pool.acquire() as conn:

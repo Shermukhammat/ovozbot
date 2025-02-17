@@ -28,6 +28,6 @@ class InlineKeyboards:
             search_text = "🔍 Ovoz izlash"
  
         return InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton("❤️/💔", callback_data=f'like&{id}'), InlineKeyboardButton('❌', callback_data='remove')],
+            [InlineKeyboardButton("❤️/💔", callback_data=f'{id}'), InlineKeyboardButton('❌', callback_data='remove')],
             [InlineKeyboardButton(search_text, switch_inline_query_current_chat=query)]
             ])
