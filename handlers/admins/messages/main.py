@@ -32,6 +32,9 @@ async def admin_text_handler(update : types.Message):
         else:
             await update.answer("🤷🏻‍♂️ Xoizrda birotaham ovoz yoq")
 
+    elif update.text == "⬅️ Orqaga":
+        await update.answer("🎛 Bosh menyu", reply_markup = Keyboards.admin_home_menu)
+        
     elif len(update.text) > 2:
         await update.reply("🔍 Natijalarni ko'rish uchun pastdagi tugamani bosing",
                             reply_markup = InlineKeyboards.search_voice(update.text))

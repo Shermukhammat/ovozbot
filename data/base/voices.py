@@ -21,7 +21,6 @@ class Voice:
         self.views = views
         self.message_id = message_id
         self.in_playlist = in_playlist
-        self.tag = self.title
 
     @property
     def str_id(self) -> str:
