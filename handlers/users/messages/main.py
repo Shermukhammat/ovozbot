@@ -33,7 +33,7 @@ async def user_text_handler(update : types.Message, user : User):
                                message_id=db.HELP_CONTENT)
     
     elif update.text == "🎤 Ovoz qo'shish ➕":
-        await update.answer("Qo'shmoqchi bo'lgan ovozingzni jo'nating musiqa yoki ovozli xabar ko'rnishda",
+        await update.answer("Qo'shmoqchi bo'lgan ovozingzni jo'nating musiqa yoki ovozli xabar ko'rnishida",
                             reply_markup=Keyboards.back_button)
 
     elif update.text == "⬅️ Orqaga":
