@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 from data import User, Voice
 from uuid import uuid4
 from buttons import InlineKeyboards, Keyboards
-from utilites import register_user
+from utilites import register_user, UserStates
 
 
 
@@ -31,6 +31,10 @@ async def user_text_handler(update : types.Message, user : User):
         await bot.copy_message(chat_id=update.from_user.id,
                                from_chat_id=db.DATA_CHANEL_ID,
                                message_id=db.HELP_CONTENT)
+    
+    elif update.text == "🎤 Ovoz qo'shish ➕":
+        await update.answer("Qo'shmoqchi bo'lgan ovozingzni jo'nating musiqa yoki ovozli xabar ko'rnishda",
+                            reply_markup=Keyboards.back_button)
 
     elif update.text == "⬅️ Orqaga":
         await update.answer("🎛 Bosh menyu", reply_markup = Keyboards.user_home_menu)
@@ -52,3 +56,4 @@ async def user_text_handler(update : types.Message, user : User):
     
     else:
         await update.answer("🎛 Bosh menyu", reply_markup = Keyboards.user_home_menu)
+

@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
+from data import PreVoice
 
 
 class InlineKeyboards:
@@ -31,3 +31,36 @@ class InlineKeyboards:
             [InlineKeyboardButton("❤️/💔", callback_data=f'{id}'), InlineKeyboardButton('❌', callback_data='remove')],
             [InlineKeyboardButton(search_text, switch_inline_query_current_chat=query)]
             ])
+    
+    def pre_voices(voices : list[PreVoice], offset : int | None = 0, leng : int | None = 10) -> InlineKeyboardButton:
+        if len(voices) < 6:
+            buttons = [[InlineKeyboardButton(str(index+1), callback_data=f"pr{voice.id}") for index, voice in enumerate(voices)]]
+        else:
+            buttons = [[InlineKeyboardButton(str(index+1), callback_data=f"pr{voice.id}") for index, voice in enumerate(voices[:5])],
+                       [InlineKeyboardButton(str(index+6), callback_data=f"pr{voice.id}") for index, voice in enumerate(voices[5:])]]
+
+        if offset + 10 < leng:
+            next = f"next{offset+10}"
+        else:
+            next = f"no_next"
+        
+        if offset < 10:
+            back = 'no_back'
+        else:
+            back = f"back{offset - 10}"
+
+        buttons.append([InlineKeyboardButton("⬅️", callback_data = back), InlineKeyboardButton("❌", callback_data = 'remove'), InlineKeyboardButton("➡️", callback_data = next)])
+        return InlineKeyboardMarkup(inline_keyboard = buttons)
+    
+
+    def pre_voice(voice: PreVoice) -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("✅ Qo'shish", callback_data = f'aceptpr{voice.id}'), InlineKeyboardButton("🗑 O'chrish", callback_data=f'delpr{voice.id}')],
+            [InlineKeyboardButton("❌", callback_data = 'remove')]
+        ])
+    
+    def pre_voice_acepting() -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("✏️ Nomi", callback_data = f'title'), InlineKeyboardButton("✏️ Tegi", callback_data=f'tag')],
+            [InlineKeyboardButton("⬅️ Orqaga", callback_data = 'back'), InlineKeyboardButton("✅ Tayyor", callback_data = 'done')],
+        ])

@@ -1,7 +1,9 @@
 from asyncpg.pool import PoolAcquireContext, Pool
 from datetime import datetime
 from aiocache import SimpleMemoryCache
+from pytz import timezone
 
+tz_tashkent = timezone('Asia/Tashkent')
 
 class Voice:
     def __init__(self,
@@ -19,6 +21,7 @@ class Voice:
         self.views = views
         self.message_id = message_id
         self.in_playlist = in_playlist
+        self.tag = self.title
 
     @property
     def str_id(self) -> str:
@@ -26,6 +29,39 @@ class Voice:
 
     def __str__(self) -> str:
         return f"Voice(id = {self.id}, title = '{self.title}', tag = '{self.tag}', url = '{self.url}', message_id = {self.message_id})"
+
+class PreVoice:
+    def __init__(self,
+                 id : int = None,
+                 url : str = None,
+                 user_id : int = None,
+                 time : datetime = None,
+                 title : str = None,
+                 username : str = None,
+                 message_id : int = None) -> None:
+        self.id = id
+        self.url = url
+        self.title = title
+        self.user_id = user_id
+        self.message_id = message_id
+        self.username = username
+        self.tag = title
+        
+        if time:
+            self.time = time
+        else:
+            self.time = datetime.now(tz_tashkent)
+
+    @property
+    def readble_time(self) -> str: 
+        return self.time.strftime('%Y.%m.%d %H:%M')
+
+    @property
+    def str_id(self) -> str:
+        return str(self.id)
+
+    def __str__(self) -> str:
+        return f"PreVoice(id = {self.id}, user_id = '{self.user_id}', url = '{self.url}', message_id = {self.message_id})"
 
 
 
@@ -35,6 +71,7 @@ class VoicesDb:
     def __init__(self, ttl : int = 30):
         self.voices_cache = SimpleMemoryCache(ttl = ttl)
         self.playlist_cache = SimpleMemoryCache(ttl = ttl)
+        self.pre_voices_cache = SimpleMemoryCache(ttl = ttl)
         self.pool : Pool = None
         self.PINED_VOICES : list[int] = []
         
@@ -161,6 +198,45 @@ class VoicesDb:
             
             await self.voices_cache.set(f'lates{offset}', lates)
             return lates
+    
+    async def add_pre_voice(self, voice : PreVoice) -> bool:
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            row = await conn.fetchrow(""" INSERT INTO pre_voices (user_id, url, message_id, time, username, title) VALUES($1, $2, $3, $4, $5, $6) RETURNING id;""", voice.user_id, voice.url, voice.message_id, voice.time, voice.username, voice.title)
+            if row:
+                voice.id = row[0]
+                await self.pre_voices_cache.set(voice.id, voice)
+                return True
+            return False
+    
+    async def delete_pre_voice(self, id : int):
+        await self.pre_voices_cache.delete(id)
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            await conn.execute(""" DELETE FROM pre_voices WHERE id = $1;""", id)
+
+    async def get_pre_voice(self, id : int) -> PreVoice:
+        await self.pre_voices_cache.delete(id)
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            row = await conn.fetchrow("SELECT time AT TIME ZONE 'Asia/Tashkent', username, id, user_id, url, message_id, title FROM pre_voices WHERE id = $1;", id)
+            if row:
+                voice = PreVoice(id = row['id'], url = row['url'], user_id=row['user_id'], message_id=row['message_id'], username=row['username'], time=row[0], title=row['title'])
+                await self.pre_voices_cache.set(id, voice)
+                return voice
+            
+    async def get_pre_voices(self, offset : int | None = 0, limit : int | None = 10) -> list[PreVoice]:
+        voices : list[PreVoice] = await self.pre_voices_cache.get(f'pre{offset}', [])
+        if voices:
+            return voices
+        
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            for row in  await conn.fetch("SELECT time AT TIME ZONE 'Asia/Tashkent', username, id, user_id, url, message_id, title FROM pre_voices ORDER BY id DESC LIMIT $1 OFFSET $2;", limit, offset):
+                voices.append(PreVoice(id = row['id'], url = row['url'], user_id=row['user_id'], message_id=row['message_id'], username=row['username'], time=row[0], title=row['title']))
+        
+        await self.pre_voices_cache.set(f'pre{offset}', voices)
+        return voices
 
 async def add_voice_to_db(pool : Pool, voice : Voice) -> int:
     async with pool.acquire() as conn:

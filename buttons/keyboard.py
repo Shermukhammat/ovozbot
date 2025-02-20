@@ -12,6 +12,18 @@ class Keyboards:
         [KeyboardButton("📖 Yordam")]
     ], resize_keyboard=True)
 
+    admin_home_menu = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton("🔍 Ovoz izlash")],
+        [KeyboardButton("🏆 Top ovozlar"), KeyboardButton("⭐️ Playlist")],
+        [KeyboardButton("🆕 Yangi ovozlar"), KeyboardButton("➕ Ovoz qo'shish")],
+        [KeyboardButton("📢 Reklama"), KeyboardButton("📊 Statistika")],
+        [KeyboardButton("⚙️ Sozlamalar")]
+    ], resize_keyboard=True)
+
+    back_button = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton("⬅️ Orqaga")]
+    ], resize_keyboard=True)
+
     buttons = [[KeyboardButton(list(button.keys())[0]) for button in row] for row in db.QIZQARLI_OVOZLAR]
     buttons.append([KeyboardButton("⬅️ Orqaga")])
     kulgili_ovozlar = ReplyKeyboardMarkup(buttons.copy(), resize_keyboard = True, one_time_keyboard = False)

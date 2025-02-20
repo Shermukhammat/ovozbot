@@ -3,9 +3,11 @@ from data import Admin
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from .users.inline import user_inline_search, non_user_inline_search, user_inline_playlist, user_inline_top
-from .users.messages import user_text_handler
-from .users.commands import user_menu_command_hanlder, user_admin_command_hanlder, user_start_hanlder
 from .users.callback import user_callback_handler
+from .admins.callback import admin_callback_handler
+from .users.commands import user_menu_command_hanlder, user_admin_command_hanlder, user_start_hanlder
+from .users.messages import user_text_handler
+from .admins.messages import admin_text_handler
 from uuid import uuid4
 from utilites import register_user
 import os
@@ -13,7 +15,7 @@ import os
 
     
 
-@dp.inline_handler(lambda update : update.query.startswith('#top'))
+@dp.inline_handler(lambda update : update.query.startswith('#top'), state='*')
 async def inline_top_filter(update : types.InlineQuery, state : FSMContext):
     if await db.is_user(update.from_user.id):
         await user_inline_top(update)
@@ -25,7 +27,7 @@ async def inline_top_filter(update : types.InlineQuery, state : FSMContext):
         await non_user_inline_search(update)    
 
 
-@dp.inline_handler(lambda update : update.query.startswith('#pl'))
+@dp.inline_handler(lambda update : update.query.startswith('#pl'), state='*')
 async def inline_playlist_filter(update : types.InlineQuery, state : FSMContext):
     if await db.is_user(update.from_user.id):
         await user_inline_playlist(update)
@@ -37,7 +39,7 @@ async def inline_playlist_filter(update : types.InlineQuery, state : FSMContext)
         await non_user_inline_search(update)
 
 
-@dp.inline_handler()
+@dp.inline_handler(state='*')
 async def inline_filter(update : types.InlineQuery, state : FSMContext):
     user = await db.get_user(update.from_user.id)
     if user:
@@ -56,10 +58,12 @@ async def callback_filter(update : types.CallbackQuery, state : FSMContext):
         await user_callback_handler(update)
 
     elif await db.is_admin(update.from_user.id):
-        pass
+        await admin_callback_handler(update, state)
 
     else:
         await register_user(update.from_user.id, update.from_user.first_name)
+
+
 
 
 @dp.message_handler(commands='start')
@@ -100,7 +104,7 @@ async def text_filter(update : types.Message, state : FSMContext):
         await user_text_handler(update, user)
 
     elif await db.is_admin(update.from_user.id):
-        pass
+        await admin_text_handler(update)
 
     else:
         await register_user(update.from_user.id, update.from_user.first_name)

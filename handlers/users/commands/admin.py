@@ -10,7 +10,7 @@ async def user_admin_command_hanlder(update : types.Message):
         admin = await db.get_admin(update.from_user.id)
         await update.answer(f"👤 Admin: [{admin.safe_name}]({update.from_user.url}). \n⏳ Ro'yxatdan o'tdi: {admin.registred_readble}",
                         parse_mode=types.ParseMode.MARKDOWN,
-                        reply_markup = Keyboards.user_home_menu)
+                        reply_markup = Keyboards.admin_home_menu)
         
     elif update.from_user.id in db.DEV_ID:
         async with register_sema:
@@ -18,7 +18,7 @@ async def user_admin_command_hanlder(update : types.Message):
                 admin = await db.get_admin(update.from_user.id)
                 await update.answer(f"👤 Admin: [{admin.safe_name}]({update.from_user.url}). \n⏳ Ro'yxatdan o'tdi: {admin.registred_readble}",
                                     parse_mode=types.ParseMode.MARKDOWN,
-                                    reply_markup = Keyboards.user_home_menu)
+                                    reply_markup = Keyboards.admin_home_menu)
             else:
                 await db.remove_user(update.from_user.id)
                 admin = Admin(id=update.from_user.id, name=update.from_user.first_name)
@@ -26,7 +26,7 @@ async def user_admin_command_hanlder(update : types.Message):
 
                 await update.answer(f"👤 Admin: [{admin.safe_name}]({update.from_user.url}). \n⏳ Ro'yxatdan o'tdi: {admin.registred_readble}",
                         parse_mode=types.ParseMode.MARKDOWN,
-                        reply_markup = Keyboards.user_home_menu)
+                        reply_markup = Keyboards.admin_home_menu)
             
             
 
