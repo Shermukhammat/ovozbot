@@ -11,10 +11,10 @@ async def main():
     # print(await db.add_voice(vs))
     for n in range(1, 500):
         print(n)
-        await db.add_pre_voice(Voice(url='AwACAgIAAyEGAASJ4vqHAAOwZ7XlecmFC4BuvvWB-VsEK0JeFQUAAlFmAAI1dLBJs8u8QpFhUS82BA',
-                                        title=f'Test ovoz {n}',
-                                        tag=f"test teg {n}",
-                                        message_id=176))
+        # await db.add_voice(Voice(url='AwACAgIAAyEGAASJ4vqHAAOwZ7XlecmFC4BuvvWB-VsEK0JeFQUAAlFmAAI1dLBJs8u8QpFhUS82BA',
+        #                                 title=f'Test ovoz {n}',
+        #                                 tag=f"test teg {n}",
+        #                                 message_id=176))
     # print(await db.get_top_voices())
 
 

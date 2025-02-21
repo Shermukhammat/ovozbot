@@ -186,7 +186,7 @@ class VoicesDb:
         return []
 
     async def get_lates_voices(self, limit : int | None = 45, offset : int | None = 0) -> list[Voice]: 
-        lates : list = await self.voices_cache.get(f'lates{offset}')
+        lates : list = await self.voices_cache.get(f'lates{limit}.{offset}')
         if lates:
             return lates
         
@@ -195,7 +195,7 @@ class VoicesDb:
             conn : Pool
             lates = [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(query, offset, limit)]
             
-            await self.voices_cache.set(f'lates{offset}', lates)
+            await self.voices_cache.set(f'lates{limit}.{offset}', lates)
             return lates
     
     async def add_pre_voice(self, voice : PreVoice) -> bool:

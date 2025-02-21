@@ -20,6 +20,11 @@ class Keyboards:
         [KeyboardButton("⚙️ Sozlamalar")]
     ], resize_keyboard=True)
 
+    ads_menu = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton("🔍 Qidruvda reklama"), KeyboardButton("⬆️ Reklama yuborish")],
+        [KeyboardButton("⬅️ Orqaga")]
+    ], resize_keyboard=True)
+
     back_button = ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton("⬅️ Orqaga")]
     ], resize_keyboard=True)

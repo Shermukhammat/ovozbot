@@ -14,3 +14,12 @@ async def chanel_post(update : types.Message):
         await message_data.delete()
     except:
         pass
+
+
+
+@dp.channel_post_handler(content_types=types.ContentType.VIDEO)
+async def chanel_post(update : types.Message):
+    print(update)
+    if update.video:
+        print(update.video.file_id)
+

@@ -1,7 +1,8 @@
 import yaml, os
 from ruamel.yaml import YAML
 from uuid import uuid4
-
+from aiogram import types
+from random import choice
 
 class ConfigurationYaml:
     def __init__(
@@ -56,6 +57,74 @@ class DatabseConfig:
         self.port = data.get('port', 5432)
         self.host = data.get('host', 'localhost')
 
+
+class ParamInlineButton:
+    def __init__(self, data : list[list[dict]]) -> types.InlineKeyboardMarkup:
+        self.buttons = []
+        for row in data:
+            row_data = []
+            for button in row:
+                row_data.append(types.InlineKeyboardButton(button.get('text', "tugma"), 
+                                                           callback_data=button.get('callback_data'), 
+                                                           url=button.get('url')))
+            self.buttons.append(row_data)
+    
+
+    @property
+    def replay_markup(self) -> types.InlineKeyboardMarkup:
+        if self.buttons:
+            return types.InlineKeyboardMarkup(inline_keyboard=self.buttons)
+
+class InlineAd:
+    def __init__(self, data : dict | None = {}) -> None:
+        self.id : str = data.get('id', uuid4().hex)
+        self.message_id : int = data.get('message_id')
+        self.thumb_url : str = data.get('thumb_url')
+        self.title : str = data.get('title')
+        self.type : str = data.get('type')
+        self.file_id : str = data.get('file_id')
+        self.description : str = data.get('description', '➡️ Buyerga bosing')
+        self.caption : str = data.get('caption')
+        self.parse_mode : str = data.get('parse_mode')
+        self.buttons = ParamInlineButton(data.get('buttons', []))
+        self.mime_type = data.get('mime_type', 'video/mp4')
+    
+    @property
+    def row_data(self) -> dict:
+        return {'id': self.id, 'message_id' : self.message_id, 'thumb_url': self.thumb_url, 'title': self.title, 'description': self.description, 'buttons': self.buttons}
+
+    @property
+    def inline_resolt(self) -> types.InlineQueryResultArticle:
+        if self.type == 'text':
+            return types.InlineQueryResultArticle(id=self.id, 
+                                              title=self.title, 
+                                              description=self.description, 
+                                              thumb_url=self.thumb_url, 
+                                              reply_markup= self.buttons.replay_markup,
+                                              input_message_content=types.InputTextMessageContent(self.caption, parse_mode=self.parse_mode))
+
+        elif self.type == 'photo':
+            return types.InlineQueryResultPhoto(id = self.id, 
+                                                photo_url= self.thumb_url, 
+                                                thumb_url=self.thumb_url,
+                                                title=self.title,
+                                                description=self.description,
+                                                reply_markup=self.buttons.replay_markup, 
+                                                caption=self.caption, 
+                                                parse_mode=self.parse_mode)
+
+        elif self.type == 'video':
+            return types.InlineQueryResultVideo(id = self.id, 
+                                                video_url= self.file_id, 
+                                                title=self.title, 
+                                                mime_type = self.mime_type,
+                                                description=self.description, 
+                                                thumb_url=self.thumb_url, 
+                                                reply_markup=self.buttons.replay_markup, 
+                                                caption=self.caption, 
+                                                parse_mode=self.parse_mode)
+                                
+
 class ParamsDB:
     def __init__(self, config_path : str) -> None:
         self.yaml = UGUtils(config_path)
@@ -77,6 +146,8 @@ class ParamsDB:
         self.TABRIKLAR : list[list[dict[str, int]]] = self.params_data.get('tabriklar')
         self.ovozlar_data : dict[str, int] = {}
         self.PINED_VOICES : list[int] = self.params_data.get('pined_voices', [])
+        self.inline_ads = self.params_data.get('inline_ads', [])
+        self.inline_ads : list[InlineAd] = [InlineAd(ad) for ad in self.inline_ads]
 
         for row in self.QIZQARLI_OVOZLAR + self.SHERLAR + self.TABRIKLAR:
             for button in row:
@@ -86,3 +157,16 @@ class ParamsDB:
 
     def update_params(self):
         self.yaml.update_yaml(self.params_data)
+
+
+    @property
+    def ads_exsis(self) -> bool:
+        return bool(self.inline_ads)
+    
+    @property
+    def random_ads(self) -> types.InlineQueryResultArticle:
+        if len(self.inline_ads) == 1:
+            return self.inline_ads[0].inline_resolt
+
+        elif len(self.inline_ads) > 1:
+            return choice(self.inline_ads).inline_resolt
