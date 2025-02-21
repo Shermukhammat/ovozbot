@@ -26,8 +26,8 @@ async def admin_text_handler(update : types.Message):
     elif update.text == "🆕 Yangi ovozlar":
         voices = await db.get_pre_voices()
         if voices:
-            text = pre_voices_list_text(voices)
-            await update.answer(text, reply_markup=InlineKeyboards.pre_voices(voices))
+            text = await pre_voices_list_text(voices)
+            await update.answer(text, reply_markup=InlineKeyboards.pre_voices(voices, 0, await db.prevoices_leng))
 
         else:
             await update.answer("🤷🏻‍♂️ Xoizrda birotaham ovoz yoq")
@@ -44,8 +44,8 @@ async def admin_text_handler(update : types.Message):
 
 
 
-def pre_voices_list_text(voices : list[PreVoice], offset : int | None = 0, limit : int | None = 10) -> str:
-    text = f"Natijalar {offset+1}-{offset+limit if offset > 10 else len(voices)}"
+async def pre_voices_list_text(voices : list[PreVoice], offset : int | None = 0, limit : int | None = 10) -> str:
+    text = f"Natijalar {offset+1}-{offset+limit if offset > 10 else len(voices)}  {await db.prevoices_leng} dan"
     for index, voice in enumerate(voices):        
         if voice.username:
             text += f"\n{index+1}. {voice.title}"

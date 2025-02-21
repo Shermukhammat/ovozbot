@@ -45,9 +45,9 @@ class InlineKeyboards:
             next = f"no_next"
         
         if offset < 10:
-            back = 'no_back'
+            back = 'no_next'
         else:
-            back = f"back{offset - 10}"
+            back = f"next{offset - 10}"
 
         buttons.append([InlineKeyboardButton("⬅️", callback_data = back), InlineKeyboardButton("❌", callback_data = 'remove'), InlineKeyboardButton("➡️", callback_data = next)])
         return InlineKeyboardMarkup(inline_keyboard = buttons)

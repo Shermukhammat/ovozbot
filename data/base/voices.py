@@ -221,9 +221,23 @@ class VoicesDb:
             row = await conn.fetchrow("SELECT time AT TIME ZONE 'Asia/Tashkent', username, id, user_id, url, message_id, title FROM pre_voices WHERE id = $1;", id)
             if row:
                 voice = PreVoice(id = row['id'], url = row['url'], user_id=row['user_id'], message_id=row['message_id'], username=row['username'], time=row[0], title=row['title'])
-                await self.pre_voices_cache.set(id, voice)
+                await self.pre_voices_cache.set(id, voice, 10)
                 return voice
-            
+    @property
+    async def prevoices_leng(self) -> int:
+        cached_length = await self.pre_voices_cache.get('prevoices_length')
+        if cached_length is not None:
+            return cached_length
+        
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            row = await conn.fetchrow("SELECT COUNT(id) FROM pre_voices;")
+            if row:
+                length = row[0]
+                await self.pre_voices_cache.set('prevoices_length', length, ttl=10)
+                return length
+            return 0
+
     async def get_pre_voices(self, offset : int | None = 0, limit : int | None = 10) -> list[PreVoice]:
         voices : list[PreVoice] = await self.pre_voices_cache.get(f'pre{offset}', [])
         if voices:
@@ -234,7 +248,7 @@ class VoicesDb:
             for row in  await conn.fetch("SELECT time AT TIME ZONE 'Asia/Tashkent', username, id, user_id, url, message_id, title FROM pre_voices ORDER BY id DESC LIMIT $1 OFFSET $2;", limit, offset):
                 voices.append(PreVoice(id = row['id'], url = row['url'], user_id=row['user_id'], message_id=row['message_id'], username=row['username'], time=row[0], title=row['title']))
         
-        await self.pre_voices_cache.set(f'pre{offset}', voices)
+        await self.pre_voices_cache.set(f'pre{offset}', voices, ttl=10)
         return voices
 
 async def add_voice_to_db(pool : Pool, voice : Voice) -> int:
