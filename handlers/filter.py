@@ -3,7 +3,7 @@ from data import Admin
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from .users.inline import user_inline_search, non_user_inline_search, user_inline_playlist, user_inline_top
-from .admins.inline import admin_inline_search
+from .admins.inline import admin_inline_search, admin_inline_playlist, admin_inline_top
 from .users.callback import user_callback_handler
 from .admins.callback import admin_callback_handler
 from .users.commands import user_menu_command_hanlder, user_admin_command_hanlder, user_start_hanlder
@@ -18,23 +18,29 @@ import os
 
 @dp.inline_handler(lambda update : update.query.startswith('#top'), state='*')
 async def inline_top_filter(update : types.InlineQuery, state : FSMContext):
-    if await db.is_user(update.from_user.id):
+    if update.query != '#top':
+        pass
+
+    elif await db.is_user(update.from_user.id):
         await user_inline_top(update)
 
     elif await db.is_admin(update.from_user.id):
-        pass
+        await admin_inline_top(update)
 
     else:
         await non_user_inline_search(update)    
 
 
 @dp.inline_handler(lambda update : update.query.startswith('#pl'), state='*')
-async def inline_playlist_filter(update : types.InlineQuery, state : FSMContext):
-    if await db.is_user(update.from_user.id):
+async def inline_playlist_filter(update : types.InlineQuery):
+    if update.query != '#pl':
+        pass
+    
+    elif await db.is_user(update.from_user.id):
         await user_inline_playlist(update)
 
     elif await db.is_admin(update.from_user.id):
-        pass
+        await admin_inline_playlist(update)
 
     else:
         await non_user_inline_search(update)

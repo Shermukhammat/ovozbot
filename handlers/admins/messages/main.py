@@ -9,7 +9,10 @@ from utilites import register_user
 
 
 async def admin_text_handler(update : types.Message):
-    if update.text == "🏆 Top ovozlar":
+    if update.via_bot:
+        pass
+    
+    elif update.text == "🏆 Top ovozlar":
         await update.answer("👇 Top ovozlarni ko'rish uchun pastdagi tugmani bosing", reply_markup = InlineKeyboards.show_top)
     
     elif update.text == "🔍 Ovoz izlash":
