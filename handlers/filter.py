@@ -3,6 +3,7 @@ from data import Admin
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from .users.inline import user_inline_search, non_user_inline_search, user_inline_playlist, user_inline_top
+from .admins.inline import admin_inline_search
 from .users.callback import user_callback_handler
 from .admins.callback import admin_callback_handler
 from .users.commands import user_menu_command_hanlder, user_admin_command_hanlder, user_start_hanlder
@@ -46,7 +47,7 @@ async def inline_filter(update : types.InlineQuery, state : FSMContext):
         await user_inline_search(update)
 
     elif await db.is_admin(update.from_user.id):
-        pass
+        await admin_inline_search(update)
 
     else:
         await non_user_inline_search(update)

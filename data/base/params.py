@@ -107,6 +107,8 @@ class InlineAd:
             return types.InlineQueryResultPhoto(id = self.id, 
                                                 photo_url= self.thumb_url, 
                                                 thumb_url=self.thumb_url,
+                                                # photo_width = 20,
+                                                # photo_height = 20,
                                                 title=self.title,
                                                 description=self.description,
                                                 reply_markup=self.buttons.replay_markup, 

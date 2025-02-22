@@ -8,7 +8,7 @@ from utilites import register_user
 
 
 
-async def user_inline_search(update: types.InlineQuery):
+async def admin_inline_search(update: types.InlineQuery):
     is_sender = update.chat_type == 'sender'
     offset = int(update.offset) if update.offset.isdigit() else 0 
     voice_limit = 50
@@ -75,7 +75,7 @@ async def user_inline_search(update: types.InlineQuery):
 async def non_user_inline_search(update: types.InlineQuery):
     if update.chat_type == 'sender':
         await register_user(update.from_user.id, update.from_user.first_name)
-        await user_inline_search(update)
+        await admin_inline_search(update)
     
     else:
         input_register = types.InputTextMessageContent(message_text=f"❗️ Ro'yxatdan o'tish uchun botga o'tib startni bosishingiz kerak")
@@ -97,7 +97,7 @@ def inline_voice(voice : Voice, is_sender : bool | None = True, query : str | No
     if is_sender:
         return types.InlineQueryResultVoice(id = voice.str_id, voice_url=voice.url, title = voice.title, 
                                             caption = f"🎙 Nomi: {voice.title} \n🧩 Teg: {voice.tag}",
-                                            reply_markup = InlineKeyboards.voice_buttons(voice.id, query))
+                                            reply_markup = InlineKeyboards.admin_voice_buttons(voice.id, query))
     
     return types.InlineQueryResultVoice(id = voice.str_id, voice_url=voice.url, title = voice.title)
     

@@ -111,7 +111,7 @@ class VoicesDb:
             return [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(sql_query, query, query, offset, limit)]
 
 
-    async def get_playlist(self, user_id, offset : int | None = 0, limit : int | None = 50) -> list[int]:
+    async def get_playlist(self, user_id, offset : int | None = 0, limit : int | None = 50) -> list[Voice]:
         query = """SELECT v.id, v.title, v.tag, v.url, v.views, v.message_id FROM playlist p
         JOIN voices v ON v.id = p.voice_id
         WHERE p.user_id = $1 
@@ -122,7 +122,16 @@ class VoicesDb:
             conn : Pool
             return [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id']) for row in await conn.fetch(query, user_id, offset, limit)]
 
-
+    async def get_playlist_ids(self, user_id : int) -> list[int]:
+        query = """SELECT voice_id FROM playlist
+        WHERE user_id = $1 
+        ORDER BY ctid DESC; """
+        async with self.pool.acquire() as conn:
+            conn : Pool
+            ids = [row['voice_id'] for row in await conn.fetch(query, user_id)]
+            await self.playlist_cache.set(user_id, ids)
+            return ids
+        
     async def add_voice_to_playlist(self, user_id : int, voice_id : int):
         playlist : list[int] = await self.playlist_cache.get(user_id)
         if playlist:

@@ -9,7 +9,10 @@ from utilites import register_user, UserStates
 
 
 async def user_text_handler(update : types.Message, user : User):
-    if update.text == "Kulgili ovozlar 😆":
+    if update.via_bot:
+        return
+    
+    elif update.text == "Kulgili ovozlar 😆":
         await update.answer("Kulgili ovozlar menyusi", reply_markup=Keyboards.kulgili_ovozlar)
     
     elif update.text == "Tabriklar 🎉":

@@ -23,12 +23,24 @@ class InlineKeyboards:
     
     def voice_buttons(id : int, query : str | None = "") -> InlineKeyboardButton:
         if query:
+            search_text = "▶️ Davom"
+        else:
+            search_text = "🔍 Izlash"
+ 
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("❤️/💔", callback_data=f'{id}'), InlineKeyboardButton(search_text, switch_inline_query_current_chat=query)],
+            # [InlineKeyboardButton(search_text, switch_inline_query_current_chat=query)]
+            ])
+    
+    def admin_voice_buttons(id : int, query : str | None = "") -> InlineKeyboardButton:
+        if query:
             search_text = "▶️ Davom ettirish"
         else:
             search_text = "🔍 Ovoz izlash"
  
         return InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton("❤️/💔", callback_data=f'{id}'), InlineKeyboardButton('❌', callback_data='remove')],
+            [InlineKeyboardButton("❤️/💔", callback_data=f'{id}'), InlineKeyboardButton("📌 Pin", callback_data=f'pin{id}')],
+            [InlineKeyboardButton("✏️ Tahrirlash", callback_data=f'edit{id}'), InlineKeyboardButton("🗑 O'chirish", callback_data=f'del{id}')],
             [InlineKeyboardButton(search_text, switch_inline_query_current_chat=query)]
             ])
     

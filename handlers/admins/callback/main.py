@@ -12,15 +12,15 @@ async def admin_callback_handler(update: types.CallbackQuery, state: FSMContext)
     # print(update.data)
     if update.data.isnumeric():
         voice_id = int(update.data)
-        playlist = await db.get_playlist(update.from_user.id)
+        playlist = await db.get_playlist_ids(update.from_user.id)
 
 
         if voice_id in playlist:
             await db.remove_voice_from_playlist(update.from_user.id, voice_id)
             await update.answer("✅ Ovoz playlistingizdan olib tashlandi", show_alert = True)
 
-        elif len(playlist) > 45:
-            await update.answer("❌ Playlistingizga 45 tadan kop ovoz qo'sha olmaysiz", show_alert = True)
+        elif len(playlist) > 195:
+            await update.answer("❌ Playlistingizga 200 tadan kop ovoz qo'sha olmaysiz", show_alert = True)
         
         else:
             await db.add_voice_to_playlist(update.from_user.id, voice_id)
