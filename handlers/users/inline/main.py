@@ -14,16 +14,26 @@ async def user_inline_search(update: types.InlineQuery):
     voice_limit = 50
 
     if len(update.query) > 3:
-        voices = await db.search_voices(update.query)
+        voices = await db.search_voices(update.query, offset)
+        next_offset = offset+voice_limit if offset < 49 and len(voices) == voice_limit else None
         if voices:
-            await update.answer([inline_voice(voice, is_sender, update.query) for voice in voices], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
+            resolts = [inline_voice(voice, is_sender, update.query) for voice in voices]
+            ads = db.random_ads
+            if ads and offset == 0:
+                resolts.pop()
+                resolts.insert(0, ads)
+                if next_offset:
+                    next_offset -= 1
+
+            # print(f'offset: {offset}, next_offset: {next_offset} leng: {len(resolts)}')
+            await update.answer(resolts, cache_time = db.INLINE_CACHE_TIME, is_personal = True, next_offset=next_offset)
         else:
             await update.answer([nofound("Hechnarsa topilmadi")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
     elif db.PINED_VOICES:
         # print('pined')
         voices = await db.get_pined_voices(voice_limit, offset)
-        next_offset = offset+voice_limit if offset < 149 and len(voices) == voice_limit else ""
+        next_offset = offset+voice_limit if offset < 149 and len(voices) == voice_limit else None
  
         if voices:
             resolts = [inline_voice(voice, is_sender, update.query) for voice in voices]
@@ -39,9 +49,9 @@ async def user_inline_search(update: types.InlineQuery):
         else:
             await update.answer([nofound("Hozirda botda birortaxam ovoz yo'q")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
-    else:
+    elif update.query == '':
         voices = await db.get_lates_voices(voice_limit, offset)
-        next_offset = offset+voice_limit if offset < 149 and len(voices) == voice_limit else ""
+        next_offset = offset+voice_limit if offset < 149 and len(voices) == voice_limit else None
 
         if voices:
             resolts = [inline_voice(voice, is_sender, update.query) for voice in voices]

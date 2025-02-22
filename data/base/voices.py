@@ -99,28 +99,29 @@ class VoicesDb:
             await conn.execute(""" DELETE FROM voices WHERE id = $1""", id)
 
 
-    async def search_voices(self, query : str, limit : int = 20) -> list[Voice]:
+    async def search_voices(self, query : str, offset : int | None = 0, limit : int | None = 50) -> list[Voice]:
         sql_query = """SELECT id, title, tag, url, message_id, views 
         FROM voices
         WHERE SIMILARITY(tag, $1) > 0.2
         ORDER BY SIMILARITY(tag, $2) DESC 
-        LIMIT $3; """
+        OFFSET $3
+        LIMIT $4; """
         async with self.pool.acquire() as conn:
             conn : Pool
-            return [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(sql_query, query, query, limit)]
+            return [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id'], views=row['views']) for row in await conn.fetch(sql_query, query, query, offset, limit)]
 
 
-    async def get_playlist(self, user_id) -> list[int]:
-        playlist = await self.playlist_cache.get(user_id)
-        if playlist:
-            return playlist
-        
+    async def get_playlist(self, user_id, offset : int | None = 0, limit : int | None = 50) -> list[int]:
+        query = """SELECT v.id, v.title, v.tag, v.url, v.views, v.message_id FROM playlist p
+        JOIN voices v ON v.id = p.voice_id
+        WHERE p.user_id = $1 
+        ORDER BY p.ctid DESC 
+        OFFSET $2 
+        LIMIT $3;"""
         async with self.pool.acquire() as conn:
             conn : Pool
-            playlist = [row['voice_id'] for row in await conn.fetch(" SELECT voice_id FROM playlist WHERE user_id = $1 ORDER BY ctid DESC; ", user_id)]
-            await self.playlist_cache.set(user_id, playlist)
+            return [Voice(id=row['id'], title=row['title'], tag=row['tag'], url=row['url'], message_id=row['message_id']) for row in await conn.fetch(query, user_id, offset, limit)]
 
-            return playlist
 
     async def add_voice_to_playlist(self, user_id : int, voice_id : int):
         playlist : list[int] = await self.playlist_cache.get(user_id)
@@ -142,8 +143,8 @@ class VoicesDb:
             conn : Pool
             await conn.execute("DELETE FROM playlist WHERE user_id = $1 AND voice_id = $2", user_id, voice_id)
     
-    async def get_top_voices(self) -> list[Voice]:
-        voices : list = await self.voices_cache.get('top', [])
+    async def get_top_voices(self, offset : int | None = 0, limit : int | None = 50) -> list[Voice]:
+        voices : list = await self.voices_cache.get(f'top{offset}', [])
         if voices:
             return voices
         
@@ -153,8 +154,8 @@ class VoicesDb:
         FROM voices v
         JOIN playlist p ON v.id = p.voice_id
         GROUP BY v.id
-        ORDER BY usage_count DESC
-        LIMIT 47; """):
+        ORDER BY usage_count DESC OFFSET $1
+        LIMIT $2; """, offset, limit):
                 voices.append(Voice(id = row['id'],
                                     tag = row['tag'],
                                     url = row['url'],

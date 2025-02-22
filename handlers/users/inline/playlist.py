@@ -8,19 +8,23 @@ from buttons import InlineKeyboards
 
 async def user_inline_playlist(update: types.InlineQuery):
     is_sender = update.chat_type == 'sender'
+    offset = int(update.offset) if update.offset.isdigit() else 0 
+    voice_limit = 50
 
-    playlist = await db.get_playlist(update.from_user.id)
-    if playlist:
-        voices =[]
-        for id in playlist:
-            voice = await db.get_voice(id)
-            if voice:
-                voices.append(inline_voice(voice, is_sender, update.query))
-        
-        if voices:  
-            await update.answer(voices, cache_time = 10, is_personal = True) 
-        else:
-            await update.answer([nofound("🤷🏻‍♂️ Playlistingiz bo'sh")], cache_time = 10, is_personal = True)
+    voices = await db.get_playlist(update.from_user.id, offset)  
+    next_offset = offset+voice_limit if offset < 149 and len(voices) == voice_limit else None      
+    if voices:
+        resolts = [inline_voice(voice, is_sender, update.query) for voice in voices]
+        ads = db.random_ads
+        if ads and offset == 0:
+            resolts.pop()
+            resolts.insert(0, ads)
+            if next_offset:
+                next_offset -= 1
+
+        # print(f'offset: {offset}, next_offset: {next_offset} leng: {len(resolts)}')
+        await update.answer(resolts, cache_time = 10, is_personal = True, next_offset=next_offset)
+
     else:
         await update.answer([nofound("🤷🏻‍♂️ Playlistingiz bo'sh")], cache_time = 10, is_personal = True)
 

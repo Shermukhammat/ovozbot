@@ -8,14 +8,27 @@ from buttons import InlineKeyboards
 
 async def user_inline_top(update: types.InlineQuery):
     is_sender = update.chat_type == 'sender'
+    offset = int(update.offset) if update.offset.isdigit() else 0 
+    voice_limit = 50
 
-    voices = await db.get_top_voices()
-    if voices:  
-        # print(voices)
-        await update.answer([inline_voice(voice, is_sender, update.query) for voice in voices], cache_time = 10, is_personal = True) 
+    voices = await db.get_top_voices(offset, voice_limit)
+    if voices:
+        next_offset = offset+voice_limit if offset < 149 and len(voices) == voice_limit else None
+        resolts = [inline_voice(voice, is_sender, update.query) for voice in voices]
+
+        ads = db.random_ads
+        if ads and offset == 0:
+            resolts.pop()
+            resolts.insert(0, ads)
+            if next_offset:
+                next_offset -= 1
+
+        
+        # print(f'offset: {offset}, next_offset: {next_offset} leng: {len(resolts)}')
+        await update.answer(resolts, cache_time = db.INLINE_CACHE_TIME, is_personal = True, next_offset=next_offset)
 
     else:
-        await update.answer([nofound("🤷🏻‍♂️ Topda birotaham ovoz yoq")], cache_time = 10, is_personal = True)
+        await update.answer([nofound("🤷🏻‍♂️ Topda birotaham ovoz yoq")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
 
 input_content = types.InputTextMessageContent(f"So'rovingiz boyicha hechnarsa topilmadi")
