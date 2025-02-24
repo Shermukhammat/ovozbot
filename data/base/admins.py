@@ -116,7 +116,7 @@ async def get_admins_from_db(pool : Pool) -> list[Admin]:
     resolt = []
     async with pool.acquire() as conn:
         conn : Pool
-        for row in await conn.fetch("""SELECT id, registered AT TIME ZONE 'Asia/Tashkent', name, lang FROM admins;"""):
+        for row in await conn.fetch("""SELECT id, registered AT TIME ZONE 'Asia/Tashkent' as registered, name, lang FROM admins;"""):
             resolt.append(Admin(id = row['id'], 
                     registered=row['registered'],
                     name=row['name'],

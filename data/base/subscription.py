@@ -21,7 +21,7 @@ class Subscribtion:
 
     def should_check(self, minutes: int = 5) -> bool:
         now = datetime.now(tz_tashkent)
-        check_time = self.last_check + timedelta(seconds=minutes)
+        check_time = self.last_check + timedelta(minutes=minutes)
         return now >= check_time
     
     def upate_last_check(self):
@@ -74,3 +74,20 @@ class SubscribtionDB:
         async with self.pool.acquire() as conn:
             conn: Pool
             await conn.execute("DELETE FROM subscription WHERE chat_id = $1", chat_id)
+
+
+    async def get_subscribed_users_count(self, chat_id: str) -> int:
+        cache_key = f"count{chat_id}"
+        count = await self.subscription_cache.get(cache_key)
+        if count is not None:
+            return count
+
+        async with self.pool.acquire() as conn:
+            conn: Pool
+            row = await conn.fetchrow("SELECT COUNT(chat_id) FROM subscription WHERE chat_id = $1 AND joined = TRUE ;", chat_id)
+            if row:
+                count = row[0]
+                await self.subscription_cache.set(cache_key, count, ttl = 10)
+                return count
+
+        return 0

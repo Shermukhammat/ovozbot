@@ -23,13 +23,29 @@ async def check_subscription(user_id : int, chanels : list[Chanel]) -> list[Inli
     chanels_button = []
     for chanel in chanels:
         if chanel.request_join:
-            pass
+            sub = await db.get_subscription(user_id, chanel.id)
+            if sub:
+                if not sub.joined:
+                    if await subscribed(sub):
+                        sub.joined = True
+                        await db.update_subscription(sub)
+                    else:
+                        chanels_button.append([InlineKeyboardButton(chanel.name, url=chanel.url)])
+
+            else:
+                sub = Subscribtion(user_id, chanel.id)
+                if await subscribed(sub):
+                    sub.joined = True
+                    await db.add_subscription(sub)
+                else:
+                    await db.add_subscription(sub)
+                    chanels_button.append([InlineKeyboardButton(chanel.name, url=chanel.url)])
 
         else:
             sub = await db.get_subscription(user_id, chanel.id)
             if sub:
                 if sub.joined:
-                    if sub.should_check(minutes = 15):
+                    if sub.should_check(minutes = 2):
                         sub.upate_last_check()
                         if await subscribed(sub):
                             await db.update_subscription(sub)
@@ -42,6 +58,8 @@ async def check_subscription(user_id : int, chanels : list[Chanel]) -> list[Inli
                     sub.joined = True
                     sub.upate_last_check()
                     await db.update_subscription(sub)
+
+                    await check_chanel_join_limit(chanel)
 
                 else:
                     chanels_button.append([InlineKeyboardButton(chanel.name, url=chanel.url)])
@@ -58,6 +76,24 @@ async def check_subscription(user_id : int, chanels : list[Chanel]) -> list[Inli
     
     return chanels_button
 
+
+async def check_chanel_join_limit(chanel : Chanel):
+    count = await db.get_subscribed_users_count(chanel.id)
+    # print('chanel.user_count', chanel.user_count)
+    # print('count: ', count)
+
+    if chanel.user_count <= count:
+        async with db.paramas_sem:
+            if db.CHANELS_DICT.get(chanel.id) and chanel.id in db.CHANELS_DICT:
+                del db.CHANELS_DICT[chanel.id]
+                db.CHANELS.remove(chanel)
+                db.update_params()
+
+                await db.delete_subscription_chanel(chanel.id)
+
+                for admin in await db.get_admins():
+                    await bot.send_message(chat_id=admin.id, 
+                                               text=f"📡 {chanel.name} odam qo'shish limitga yetdi \n👥 Odam qo'shildi: {count} \nHavola: {chanel.url}  \n❗️ Kanal majburiy obunadan olib tashlandi")
 
 async def message_checking(update : types.Message, chanels : list[Chanel]):
     if update.via_bot:

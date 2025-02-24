@@ -3,6 +3,7 @@ from ruamel.yaml import YAML
 from uuid import uuid4
 from aiogram import types
 from random import choice
+from asyncio import Semaphore
 
 class ConfigurationYaml:
     def __init__(
@@ -134,7 +135,7 @@ class Chanel:
         self.name = data.get('name')
         self.url = data.get('url')
         self.request_join = data.get('request_join', False)
-        self.auto_join = data.get('auto_join', True)
+        self.auto_join = data.get('auto_join', False)
         self.user_count = data.get('user_count', 0)
 
     @property
@@ -165,6 +166,7 @@ class ParamsDB:
     def __init__(self, config_path : str) -> None:
         self.yaml = UGUtils(config_path)
         self.params_data = self.yaml.get_yaml()
+        self.paramas_sem = Semaphore()
     
         self.config = DatabseConfig(self.params_data.get('database', {}))
         self.TOKEN = self.params_data.get('token')
@@ -185,12 +187,16 @@ class ParamsDB:
         self.inline_ads = self.params_data.get('inline_ads', [])
         self.inline_ads : list[InlineAd] = [InlineAd(ad) for ad in self.inline_ads]
         self.CHANELS : list[Chanel] = [Chanel(chanel) for chanel in self.params_data.get('chanels', [])]
+        self.CHANELS_DICT = {chanel.id : chanel for chanel in self.CHANELS}
+
         for row in self.QIZQARLI_OVOZLAR + self.SHERLAR + self.TABRIKLAR:
             for button in row:
                 for name, id in button.items():
                     self.ovozlar_data[name] = id
 
-
+    def update_chanel_dict(self):
+        self.CHANELS_DICT = {chanel.id : chanel for chanel in self.CHANELS}
+        
     def update_params(self):
         self.yaml.update_yaml(self.params_data)
 
