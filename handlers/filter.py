@@ -69,7 +69,9 @@ async def callback_filter(update : types.CallbackQuery, state : FSMContext):
 
     else:
         await register_user(update.from_user.id, update.from_user.first_name)
-
+        if update.data == 'check_sub':
+            if update.message:
+                await update.message.delete()
 
 
 

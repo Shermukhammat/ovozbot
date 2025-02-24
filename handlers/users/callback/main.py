@@ -3,7 +3,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from data import User, Voice
 from uuid import uuid4
-from buttons import InlineKeyboards
+from buttons import InlineKeyboards, Keyboards
 from utilites import shoud_edit
 
 
@@ -27,3 +27,12 @@ async def user_callback_handler(update: types.CallbackQuery):
     elif update.data == 'remove' :
         if update.message and shoud_edit(update.message.date):
             await update.message.delete()
+    
+    elif update.data == 'check_sub':
+        if update.message:
+            await update.message.answer("✅ Botdan foydalnishingiz mumkun", reply_markup=Keyboards.user_home_menu)
+
+
+        if update.message and shoud_edit(update.message.date):
+            await update.message.delete()
+            
