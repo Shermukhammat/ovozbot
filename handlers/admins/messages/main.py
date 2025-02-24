@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 from data import User, PreVoice
 from uuid import uuid4
 from buttons import InlineKeyboards, Keyboards
-from utilites import register_user
+from utilites import register_user, AdminStates
 
 
 
@@ -56,3 +56,11 @@ async def pre_voices_list_text(voices : list[PreVoice], offset : int | None = 0,
             text += f"\n{index+1}. {voice.title}"
     
     return text
+
+
+
+@dp.message_handler(state=AdminStates.delete_voice)
+async def delete_voice_message(update: types.Message, state: FSMContext):
+    await update.answer("✅ Ovozni o'chrish bekor qilndi")
+    await state.reset_state()
+    await update.delete()

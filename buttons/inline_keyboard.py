@@ -76,3 +76,15 @@ class InlineKeyboards:
             [InlineKeyboardButton("✏️ Nomi", callback_data = f'title'), InlineKeyboardButton("✏️ Tegi", callback_data=f'tag')],
             [InlineKeyboardButton("⬅️ Orqaga", callback_data = 'back'), InlineKeyboardButton("✅ Tayyor", callback_data = 'done')],
         ])
+    
+    def wanna_delet(token : str) -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("✅ Xa", callback_data=token), InlineKeyboardButton("❌ Yoq", callback_data='no')]
+        ])
+    
+    def edit_voice(voice_id : int) -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton("✏️ Nomi"), InlineKeyboardButton("✏️ Teg")],
+            [InlineKeyboardButton("📁 Ovoz", callback_data=f'voice')],
+            [InlineKeyboardButton("❌", callback_data = 'remove')]
+        ])

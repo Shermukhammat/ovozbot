@@ -3,7 +3,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from data import User, Voice, PreVoice
 from uuid import uuid4
-from buttons import InlineKeyboards
+from buttons import InlineKeyboards, Keyboards
 from utilites import shoud_edit, AdminStates
 from datetime import datetime
 
@@ -111,6 +111,20 @@ async def admin_callback_handler(update: types.CallbackQuery, state: FSMContext)
             await db.delete_pre_voice(voice_id)
             await update.answer("✅ Ovoz o'chirildi", show_alert = True)
 
+    elif update.data.startswith('del'):
+        voice_id = update.data.replace('del', '')
+        if not voice_id.isnumeric():
+            return
+        voice_id = int(voice_id)
+        vs = await db.get_voice(voice_id)
+        if vs:
+            await state.set_state(AdminStates.delete_voice)
+            token = uuid4().hex[:20]
+
+            await state.set_state(AdminStates.delete_voice)
+            await state.set_data({'vs': vs, 'token' : token})
+            await bot.send_message(text="Xaqiqatdan ham ovozni o'chrimoqchimisiz ❓", chat_id=update.from_user.id, reply_markup=InlineKeyboards.wanna_delet(token))
+
     elif update.data == 'no_next':
         await update.answer("❌ Boshqa sahifa yo'q", show_alert = True)
 
@@ -118,6 +132,10 @@ async def admin_callback_handler(update: types.CallbackQuery, state: FSMContext)
         if update.message and shoud_edit(update.message.date):
             await update.message.delete()
     
+    elif update.data == 'check_sub':
+        if update.message:
+            await update.message.answer("✅ Botdan foydalnishingiz mumkun", reply_markup=Keyboards.admin_home_menu)
+
     else:
         await update.answer("❌ Noma'lum buyruq", show_alert = True)
 

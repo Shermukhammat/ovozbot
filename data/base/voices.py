@@ -97,6 +97,9 @@ class VoicesDb:
         async with self.pool.acquire() as conn:
             conn : Pool
             await conn.execute(""" DELETE FROM voices WHERE id = $1""", id)
+            await conn.execute(""" DELETE FROM playlist WHERE voice_id = $1""", id)
+
+            
 
 
     async def search_voices(self, query : str, offset : int | None = 0, limit : int | None = 50) -> list[Voice]:

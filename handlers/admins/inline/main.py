@@ -97,8 +97,9 @@ input_content = types.InputTextMessageContent(f"So'rovingiz boyicha hechnarsa to
 
 def inline_voice(voice : Voice, is_sender : bool | None = True, query : str | None = None) -> types.InlineQueryResultVoice:
     if is_sender:
+        pined = f"\n📌 Qadalgan" if voice.id in db.PINED_VOICES else ""
         return types.InlineQueryResultVoice(id = voice.str_id, voice_url=voice.url, title = voice.title, 
-                                            caption = f"🎙 Nomi: {voice.title} \n🧩 Teg: {voice.tag}",
+                                            caption = f"🎙 Nomi: {voice.title} \n🧩 Teg: {voice.tag} {pined}",
                                             reply_markup = InlineKeyboards.admin_voice_buttons(voice.id, query))
     
     return types.InlineQueryResultVoice(id = voice.str_id, voice_url=voice.url, title = voice.title)
