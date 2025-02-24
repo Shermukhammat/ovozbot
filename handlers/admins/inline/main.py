@@ -7,6 +7,7 @@ from buttons import InlineKeyboards
 from utilites import register_user
 
 
+# db.PINED_VOICES = [n for n in range(128, 626)]
 
 async def admin_inline_search(update: types.InlineQuery):
     is_sender = update.chat_type == 'sender'
@@ -32,8 +33,9 @@ async def admin_inline_search(update: types.InlineQuery):
             await update.answer([nofound("Hechnarsa topilmadi")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
     elif db.PINED_VOICES:
-        # print('pined')
-        voices = await db.get_pined_voices(voice_limit, offset)
+        if update.query != '':
+            return
+        voices = await db.get_pined_voices(offset, voice_limit)
         next_offset = offset+voice_limit if offset < 149 and len(voices) == voice_limit else None
  
         if voices:

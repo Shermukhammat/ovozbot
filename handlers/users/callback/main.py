@@ -35,4 +35,3 @@ async def user_callback_handler(update: types.CallbackQuery):
 
         if update.message and shoud_edit(update.message.date):
             await update.message.delete()
-            

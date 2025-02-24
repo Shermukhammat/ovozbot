@@ -45,6 +45,36 @@ async def admin_callback_handler(update: types.CallbackQuery, state: FSMContext)
             else:
                 await update.answer("❌ Ovoz topilmadi", show_alert = True)
     
+    elif update.data.startswith('pin'):
+        voice_id = update.data.replace('pin', '')
+        if voice_id.isnumeric():
+            voice_id = int(voice_id)
+            vs = await db.get_voice(voice_id)
+            if not vs:
+                return
+            
+            async with db.paramas_sem:
+                if voice_id in db.PINED_VOICES:
+                    db.PINED_VOICES.remove(voice_id)
+                    db.params_data['pined_voices'] = db.PINED_VOICES
+                    db.update_params()
+
+                    await update.answer("✅ Bosh sahifadan olib tashlandi", show_alert = True)
+
+                elif len(db.PINED_VOICES) > 195:
+                    await update.answer("❌ 200ta dan kop ovzni qaday olmaysiz", show_alert = True)
+                    
+                else:
+                    db.PINED_VOICES.insert(0, voice_id)
+                    db.params_data['pined_voices'] = db.PINED_VOICES
+                    db.update_params()
+
+                    # print(db.PINED_VOICES)
+
+                    await update.answer("✅ Bosh sahifaga qadaldi", show_alert=True)
+                
+                
+
     elif update.data.startswith('aceptpr'):
         voice_id = update.data.replace('aceptpr', '')
         if voice_id.isnumeric():

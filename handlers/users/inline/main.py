@@ -32,8 +32,10 @@ async def user_inline_search(update: types.InlineQuery):
             await update.answer([nofound("Hechnarsa topilmadi")], cache_time = db.INLINE_CACHE_TIME, is_personal = True)
 
     elif db.PINED_VOICES:
+        if update.query != '':
+            return
         # print('pined')
-        voices = await db.get_pined_voices(voice_limit, offset)
+        voices = await db.get_pined_voices(offset, voice_limit)
         next_offset = offset+voice_limit if offset < 149 and len(voices) == voice_limit else None
  
         if voices:
