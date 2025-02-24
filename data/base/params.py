@@ -125,7 +125,41 @@ class InlineAd:
                                                 reply_markup=self.buttons.replay_markup, 
                                                 caption=self.caption, 
                                                 parse_mode=self.parse_mode)
-                                
+
+
+class Chanel:
+    def __init__(self, data : dict):
+        self.id : str = data.get('id')
+        self.username : str = data.get('username')
+        self.name = data.get('name')
+        self.url = data.get('url')
+        self.request_join = data.get('request_join', False)
+        self.auto_join = data.get('auto_join', True)
+        self.user_count = data.get('user_count', 0)
+
+    @property
+    def row_data(self) -> dict:
+        return {
+            'id': self.id,
+            'username': self.username,
+            'name': self.name,
+            'url': self.url,
+            'request_join': self.request_join,
+            'auto_join': self.auto_join,
+            'user_count': self.user_count
+        }
+    
+    def __str__(self):
+        return str({
+            'id': self.id,
+            'username': self.username,
+            'name': self.name,
+            'url': self.url,
+            'requet_join': self.request_join,
+            'auto_join': self.auto_join,
+            'user_count': self.user_count
+        })
+
 
 class ParamsDB:
     def __init__(self, config_path : str) -> None:
@@ -150,7 +184,7 @@ class ParamsDB:
         self.PINED_VOICES : list[int] = self.params_data.get('pined_voices', [])
         self.inline_ads = self.params_data.get('inline_ads', [])
         self.inline_ads : list[InlineAd] = [InlineAd(ad) for ad in self.inline_ads]
-
+        self.CHANELS : list[Chanel] = [Chanel(chanel) for chanel in self.params_data.get('chanels', [])]
         for row in self.QIZQARLI_OVOZLAR + self.SHERLAR + self.TABRIKLAR:
             for button in row:
                 for name, id in button.items():
