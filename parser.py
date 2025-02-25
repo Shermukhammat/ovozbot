@@ -19,7 +19,7 @@ async def main():
         # return
         for n in range(last, 5_350):
             message = await app.send_message('@ovozqanibot', f"/{n}")
-            await asyncio.sleep(20)
+            await asyncio.sleep(60)
         
             message = await get_last_message(app)
             if message.voice and message.caption:
