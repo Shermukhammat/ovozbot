@@ -1,7 +1,7 @@
 from pyrogram import Client, types
 import asyncio
 from data import DataBase, Voice
-
+from utilites import logger
 
 
 async def main():
@@ -19,7 +19,7 @@ async def main():
         # return
         for n in range(last, 5_350):
             message = await app.send_message('@ovozqanibot', f"/{n}")
-            await asyncio.sleep(15)
+            await asyncio.sleep(20)
         
             message = await get_last_message(app)
             if message.voice and message.caption:
@@ -61,4 +61,5 @@ def parse_tag(caption: str) -> str:
             tag += data
     return tag
 
+logger('logs2')
 asyncio.run(main())
