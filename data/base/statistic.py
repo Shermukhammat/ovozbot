@@ -7,8 +7,8 @@ class Info:
     dayly_users : int = 0
     activ_users : int = 0
     lived_users : int = 0
-    series_count : int = 0
-    movies_count : int = 0
+    pre_voices_count : int = 0
+    voices_count : int = 0
 
     today_joined : int = 0
     week_joined : int = 0
@@ -39,17 +39,17 @@ async def get_info_from_db(pool : Pool) -> Info:
         if row:
             info.activ_users = row[0]
 
-        row = await conn.fetchrow("SELECT count(*) FROM users WHERE status = 2;")
+        row = await conn.fetchrow("SELECT count(*) FROM users WHERE status = 0;")
         if row:
             info.lived_users = row[0]
 
-        row = await conn.fetchrow("SELECT count(*) FROM movies;")
+        row = await conn.fetchrow("SELECT count(*) FROM voices;")
         if row:
-            info.movies_count = row[0]
+            info.voices_count = row[0]
         
-        row = await conn.fetchrow("SELECT count(*) FROM series;")
+        row = await conn.fetchrow("SELECT count(*) FROM pre_voices;")
         if row:
-            info.series_count = row[0]
+            info.pre_voices_count = row[0]
 
         row = await conn.fetchrow("SELECT count(*) FROM activity;")
         if row:

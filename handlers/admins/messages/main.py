@@ -37,7 +37,11 @@ async def admin_text_handler(update : types.Message):
 
     elif update.text == "⬅️ Orqaga":
         await update.answer("🎛 Bosh menyu", reply_markup = Keyboards.admin_home_menu)
-        
+    
+    elif update.text == "📊 Statistika":
+        st = await db.get_statistic()
+        await update.answer(f"✅ Aktiv foydalanuvchilar: {st.activ_users} \n❌ Tarketganlar: {st.lived_users} \n➕ Bugun {st.today_joined} ta foydalanuchi qo'shildi  \n➕ Bu hafta {st.week_joined} ta foydalanuchi qo'shildi \n➕ Bu oy {st.month_joined} ta foydalanuchi qo'shildi \n🔥 Bugun botdan {st.dayly_users} ta odam foydalandi   \n🎙 Ovozlar soni: {st.voices_count}\n📑 Foydalnuvchilar ovoz yubordi: {st.pre_voices_count}")
+
     elif len(update.text) > 2:
         await update.reply("🔍 Natijalarni ko'rish uchun pastdagi tugamani bosing",
                             reply_markup = InlineKeyboards.search_voice(update.text))

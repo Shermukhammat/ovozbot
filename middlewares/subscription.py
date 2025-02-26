@@ -4,7 +4,7 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from loader import bot, db
 from data import Chanel, Subscribtion
-from aiogram.utils.exceptions import ChatAdminRequired, ChatNotFound
+from aiogram.utils.exceptions import ChatAdminRequired, ChatNotFound, UnavailableMembers, BadRequest
 from uuid import uuid4
 
 
@@ -15,7 +15,23 @@ async def subscribed(sub : Subscribtion) -> bool:
         if member and member.status != 'left':
             return True
         return False
-    except:
+        
+    except (ChatAdminRequired, ChatNotFound, UnavailableMembers, BadRequest):
+        print('delting')
+        async with db.paramas_sem:
+            if db.CHANELS_DICT.get(sub.chat_id):
+                del db.CHANELS_DICT[sub.chat_id]
+                for index, chanel in enumerate(db.CHANELS):
+                    if chanel.id == sub.chat_id:
+                        del db.CHANELS[index]
+
+                db.params_data['chanels'] = [chanel.row_data for chanel in db.CHANELS]   
+                db.update_params()
+                await db.delete_subscription_chanel(sub.chat_id)
+        return True
+    
+    except Exception as e:
+        # print(e.__class__.__name__)
         return False
 
 
